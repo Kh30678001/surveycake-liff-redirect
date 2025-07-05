@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>問卷自動跳轉偵錯模式</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    .log { margin-top: 20px; color: #444; font-size: 16px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>🔍 問卷跳轉偵錯模式</h2>
+  <div id="status" class="log">正在初始化 LIFF...</div>
+  <div id="details" class="log"></div>
+
+  <script>
+    async function main() {
+      const statusEl = document.getElementById("status");
+      const detailsEl = document.getElementById("details");
+
+      try {
+        await liff.init({ liffId: "2007687489" });
+        statusEl.innerHTML = "✅ LIFF 初始化成功";
+        statusEl.className += " success";
+
+        if (!liff.isLoggedIn()) {
+          statusEl.innerHTML += "<br>🔁 使用者未登入，導向登入中...";
+          liff.login();
+        } else {
+          const profile = await liff.getProfile();
+          const uid = profile.userId;
+
+          detailsEl.innerHTML = "👤 使用者 UID：" + uid;
+          detailsEl.className = "success";
+
+          const surveyUrl = `https://www.surveycake.com/s/Vwkkn?uid=${uid}`;
+          statusEl.innerHTML += "<br>⏳ 導向問卷中...";
+          setTimeout(() => {
+            window.location.href = surveyUrl;
+          }, 2000);
+        }
+      } catch (err) {
+        statusEl.innerHTML = "❌ LIFF 初始化或跳轉錯誤";
+        statusEl.className = "error";
+        detailsEl.innerHTML = "錯誤訊息：" + err.message;
+        detailsEl.className = "error";
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
